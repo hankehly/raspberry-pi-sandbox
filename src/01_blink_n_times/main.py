@@ -1,7 +1,7 @@
 import argparse
 import time
-import RPi.GPIO as GPIO
 
+import RPi.GPIO as GPIO
 
 OUTPUT_PIN_NO = 11
 
