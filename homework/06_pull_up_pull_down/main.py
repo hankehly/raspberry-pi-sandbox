@@ -20,7 +20,7 @@ def main():
         GPIO.setup(GPIO_40, GPIO.IN)
         GPIO.setup(GPIO_38, GPIO.OUT)
         while True:
-            on = GPIO.input(GPIO_40)
+            on = GPIO.input(GPIO_40) == GPIO.HIGH
             set_led_state(on)
             print(on)
             time.sleep(0.05)
