@@ -2,6 +2,8 @@ import time
 
 import RPi.GPIO as GPIO
 
+from raspberry_pi_sandbox.gpio import cleanup, setmode
+
 GPIO_OUT = 11
 GPIO_IN = 29
 
@@ -15,35 +17,12 @@ def on_button_press(*args):
     toggle_led()
 
 
-def setmode(mode):
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            print(f"Setting mode to {mode}")
-            GPIO.setmode(mode)
-            func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
-def cleanup_on_exit(func):
-    def wrapper(*args, **kwargs):
-        try:
-            func(*args, **kwargs)
-        finally:
-            print("Cleaning up...")
-            GPIO.cleanup()
-
-    return wrapper
-
-
 @setmode(GPIO.BOARD)
-@cleanup_on_exit
+@cleanup
 def main():
     GPIO.setup(GPIO_IN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
     GPIO.setup(GPIO_OUT, GPIO.OUT)
-    GPIO.add_event_detect(GPIO_IN, GPIO.RISING, callback=on_button_press)
+    GPIO.add_event_detect(GPIO_IN, GPIO.RISING, callback=on_button_press, bouncetime=200)
     while True:
         time.sleep(0.05)
 
