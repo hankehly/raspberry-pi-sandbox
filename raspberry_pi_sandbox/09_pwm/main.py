@@ -1,72 +1,14 @@
 import argparse
 import logging
-import threading
 import time
 
 from RPi import GPIO
 
-from raspberry_pi_sandbox.gpio import cleanup, setmode
+from raspberry_pi_sandbox.gpio import LED, cleanup, setmode
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
-
-class LED:
-    def __init__(self, pin, steps=5, freq=60):
-        self._pin = pin
-        GPIO.setup(self._pin, GPIO.OUT)
-        self._freq = freq
-        self._steps = steps
-        self._pwm = GPIO.PWM(self._pin, self._freq)
-        self._pwm_on = False
-        self._sem = threading.BoundedSemaphore(self._steps)
-        self._sync()
-
-    def dim(self):
-        try:
-            logging.debug("Dimming...")
-            self._sem.release()
-            self._sync()
-        except ValueError:
-            logging.info("Already at min brightness!")
-
-    def brighten(self):
-        logging.debug("Brightening...")
-        if self._sem.acquire(blocking=False):
-            self._sync()
-        else:
-            logging.info("Already at max brightness!")
-
-    def _start_pwm(self, duty_cycle):
-        self._pwm.start(duty_cycle)
-        self._pwm_on = True
-        logging.info(f"Started PWM with duty cycle {duty_cycle}")
-
-    def _stop_pwm(self):
-        self._pwm.stop()
-        self._pwm_on = False
-        logging.info("Stopped PWM")
-
-    def _sync(self):
-        logging.debug("Syncing...")
-        duty_cycle = self._freq - (self._freq * self._sem._value / self._steps)
-        if duty_cycle == 0:
-            self._stop_pwm()
-            time.sleep(0.01)
-            GPIO.output(self._pin, GPIO.LOW)
-            logging.info("Set pin to LOW")
-        elif duty_cycle == self._freq:
-            self._stop_pwm()
-            time.sleep(0.01)
-            GPIO.output(self._pin, GPIO.HIGH)
-            logging.info("Set pin to HIGH")
-        else:
-            if self._pwm_on:
-                self._pwm.ChangeDutyCycle(duty_cycle)
-                logging.info(f"Changed duty cycle to {duty_cycle}")
-            else:
-                self._start_pwm(duty_cycle)
 
 
 @setmode(GPIO.BOARD)
