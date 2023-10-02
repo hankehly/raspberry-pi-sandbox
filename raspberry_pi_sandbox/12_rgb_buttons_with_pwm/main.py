@@ -1,12 +1,11 @@
 import argparse
+import logging
 import time
 
 from RPi import GPIO
 
-from raspberry_pi_sandbox.gpio import cleanup, setmode, LED
-from raspberry_pi_sandbox.color import hex_to_rgb_percentage, rgb_percentage_to_hex
-import logging
-
+from raspberry_pi_sandbox.color import rgb_percentage_to_hex
+from raspberry_pi_sandbox.gpio import LED, cleanup, setmode
 
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s %(levelname)s %(message)s")
 
