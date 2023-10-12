@@ -11,12 +11,15 @@ class ADC0834:
         cs (int): The chip select GPIO pin number.
         clk (int): The clock GPIO pin number.
         dio (int): The data input/output GPIO pin number.
+        frequency (int): The frequency of the clock signal in Hz.
+            The acceptable range is 10-400 kHz (10,000 - 400,000 Hz)
     """
 
-    def __init__(self, cs: int, clk: int, dio: int) -> None:
+    def __init__(self, cs: int, clk: int, dio: int, frequency: int = 50_000) -> None:
         self.cs = cs
         self.clk = clk
         self.dio = dio
+        self.frequency = frequency
         GPIO.setup(self.cs, GPIO.OUT)
         GPIO.setup(self.clk, GPIO.OUT)
 
@@ -94,4 +97,6 @@ class ADC0834:
         self._tick()
 
     def _tick(self):
-        time.sleep(0.000002)
+        period = 1 / self.frequency
+        period_half = period / 2
+        time.sleep(period_half)

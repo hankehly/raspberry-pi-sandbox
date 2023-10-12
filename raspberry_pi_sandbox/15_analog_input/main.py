@@ -1,24 +1,34 @@
+import argparse
 import time
 
 import RPi.GPIO as GPIO
 
 from raspberry_pi_sandbox.ADC0834 import ADC0834
-from raspberry_pi_sandbox.gpio import cleanup, setmode
+from raspberry_pi_sandbox.gpio import cleanup
 
 
-@setmode(GPIO.BOARD)
 @cleanup
 def main():
-    adc = ADC0834(cs=11, clk=12, dio=13)
-    GPIO.setup(15, GPIO.OUT)
-    pwm = GPIO.PWM(15, 100)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--clk", type=int, default=12, help="Clock pin")
+    parser.add_argument("--dio", type=int, default=13, help="Data in/out pin")
+    parser.add_argument("--cs", type=int, default=11, help="Chip select pin")
+    parser.add_argument(
+        "--mode", type=str, default="board", help="GPIO mode (board or bcm)"
+    )
+    parser.add_argument("--led", type=int, default=15, help="LED pin")
+    args = parser.parse_args()
+    GPIO.setmode(getattr(GPIO, args.mode.upper()))
+    GPIO.setup(args.led, GPIO.OUT)
+    adc = ADC0834(cs=args.cs, clk=args.clk, dio=args.dio)
+    pwm = GPIO.PWM(args.led, 60)
     pwm.start(0)
     try:
         while True:
-            adc_val = adc.read(channel=0)
-            adv_val_as_pct = round(adc_val / 255 * 100, 1)
-            pwm.ChangeDutyCycle(adv_val_as_pct)
-            print(f"{adv_val_as_pct}%")
+            adc_val_raw = adc.read(channel=0)
+            adc_val_pct = round(adc_val_raw / 255 * 100, 1)
+            pwm.ChangeDutyCycle(adc_val_pct)
+            print(f"{adc_val_pct}%")
             time.sleep(0.1)
     except KeyboardInterrupt:
         pass
