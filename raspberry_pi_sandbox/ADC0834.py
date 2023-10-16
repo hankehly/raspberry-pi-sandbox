@@ -29,7 +29,7 @@ class ADC0834:
         Returns an int between 0 and 255.
         """
         # Set CS pin to low to enable the ADC
-        GPIO.output(self.cs, 0)
+        GPIO.output(self.cs, GPIO.LOW)
 
         # Set DIO pin to output to setup the ADC to read from the specified channel
         GPIO.setup(self.dio, GPIO.OUT)
@@ -77,7 +77,7 @@ class ADC0834:
             self._set_clock_low()
 
         # Set CS pin to high to clear all internal registers
-        GPIO.output(self.cs, 1)
+        GPIO.output(self.cs, GPIO.HIGH)
 
         # Done reading, set DIO pin back to output
         GPIO.setup(self.dio, GPIO.OUT)
