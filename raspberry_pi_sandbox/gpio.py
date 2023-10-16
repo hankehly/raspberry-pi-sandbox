@@ -58,6 +58,7 @@ class LED(LoggingMixin):
         self._steps = steps
         self._pwm = GPIO.PWM(self._pin, self._freq)
         self._pwm_on = False
+        # the higher the semaphore value, the dimmer the LED
         self._sem = threading.BoundedSemaphore(self._steps)
         self._sync()
 
@@ -89,6 +90,27 @@ class LED(LoggingMixin):
 
     def reset(self):
         self._sem = threading.BoundedSemaphore(self._steps)
+        self._sync()
+
+    def set_brightness(self, brightness: float):
+        """
+        Set the brightness of the LED.
+
+        :param brightness: A float between 0 and 1.
+        """
+        if brightness > 1:
+            self.log.warning(
+                f"Received brightness {brightness} but max is 1. Setting to 1."
+            )
+            brightness = 1
+        elif brightness < 0:
+            self.log.warning(
+                f"Received brightness {brightness} but min is 0. Setting to 0."
+            )
+            brightness = 0
+        self._sem = threading.BoundedSemaphore(
+            self._steps - round(self._steps * brightness, 2)
+        )
         self._sync()
 
     def _start_pwm(self, duty_cycle):
