@@ -20,8 +20,11 @@ class ADC0834:
         self.clk = clk
         self.dio = dio
         self.frequency = frequency
+
+    def setup(self) -> "ADC0834":
         GPIO.setup(self.cs, GPIO.OUT)
         GPIO.setup(self.clk, GPIO.OUT)
+        return self
 
     def read(self, channel: int = 0) -> int:
         """

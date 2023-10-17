@@ -34,7 +34,7 @@ def main():
     led_green = LED(args.green_out, steps=20, freq=100)
     led_blue = LED(args.blue_out, steps=20, freq=100)
 
-    adc = ADC0834(cs=args.cs, clk=args.clk, dio=args.dio)
+    adc = ADC0834(cs=args.cs, clk=args.clk, dio=args.dio).setup()
 
     try:
         while True:

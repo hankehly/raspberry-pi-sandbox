@@ -20,7 +20,7 @@ def main():
     args = parser.parse_args()
     GPIO.setmode(getattr(GPIO, args.mode.upper()))
     GPIO.setup(args.led, GPIO.OUT)
-    adc = ADC0834(cs=args.cs, clk=args.clk, dio=args.dio)
+    adc = ADC0834(cs=args.cs, clk=args.clk, dio=args.dio).setup()
     pwm = GPIO.PWM(args.led, 60)
     pwm.start(0)
     try:
