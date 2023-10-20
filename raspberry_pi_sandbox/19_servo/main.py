@@ -1,11 +1,12 @@
 import argparse
 import time
 
-import RPi.GPIO as GPIO
 import pigpio
+import RPi.GPIO as GPIO
 
-from raspberry_pi_sandbox.gpio import cleanup
 from raspberry_pi_sandbox.ADC0834 import ADC0834
+from raspberry_pi_sandbox.gpio import cleanup
+from raspberry_pi_sandbox.utils import RollingAverageCalculator
 
 
 @cleanup
@@ -41,15 +42,18 @@ def main():
     pi.set_PWM_frequency(args.control_pin, 50)
     pi.set_PWM_range(args.control_pin, 1024)
 
+    calc = RollingAverageCalculator(20)
+
     try:
         while True:
             adc_value = adc.read(channel=0)  # between 0 and 255
+            avg_value = calc.rolling_average(adc_value)
             # Translate range 0 ~ 255 to 25 ~ 125
-            duty = round(25 + (adc_value / 255) * 100)
+            duty = round(25 + (avg_value / 255) * 100)
             pi.set_PWM_dutycycle(args.control_pin, duty)
             # pwm.ChangeDutyCycle(duty)
-            print(f"adc_value: {adc_value}, duty: {duty}")
-            time.sleep(0.05)
+            print(f"avg_value: {avg_value:.1f}, duty: {duty}")
+            time.sleep(0.01)
     except KeyboardInterrupt:
         pi.stop()
 
