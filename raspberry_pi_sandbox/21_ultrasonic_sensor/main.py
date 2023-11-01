@@ -37,7 +37,7 @@ def main():
             cm = (stop - start) * 34300 / 2
             print(f"Distance: {cm:.2f} cm")
             GPIO.output(led, cm < 10)
-            time.sleep(0.1)
+            time.sleep(0.05)
     except KeyboardInterrupt:
         pass
 
