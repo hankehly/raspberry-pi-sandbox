@@ -1,6 +1,5 @@
 import time
 
-import pigpio
 import RPi.GPIO as GPIO
 
 from raspberry_pi_sandbox.gpio import cleanup, setmode
@@ -12,11 +11,9 @@ def main():
     trig = 26
     echo = 21
     led = 20
-
     GPIO.setup(trig, GPIO.OUT)
     GPIO.setup(echo, GPIO.IN)
     GPIO.setup(led, GPIO.OUT)
-
     try:
         while True:
             GPIO.output(trig, GPIO.LOW)
@@ -24,17 +21,14 @@ def main():
             GPIO.output(trig, GPIO.HIGH)
             time.sleep(10e-6)
             GPIO.output(trig, GPIO.LOW)
-
-            result = GPIO.wait_for_edge(echo, GPIO.BOTH, timeout=100)
-            if result is None:
+            waiter1 = GPIO.wait_for_edge(echo, GPIO.BOTH, timeout=100)
+            if waiter1 is None:
                 continue
             start = time.perf_counter()
-
-            channel = GPIO.wait_for_edge(echo, GPIO.FALLING, timeout=100)
-            if channel is None:
+            waiter2 = GPIO.wait_for_edge(echo, GPIO.FALLING, timeout=100)
+            if waiter2 is None:
                 continue
             stop = time.perf_counter()
-
             # The speed of sound is 34300 cm/s.
             # The reason for dividing by 2 is because the ultrasonic sensor sends a sound wave and waits for it to bounce back.
             # The time it takes for the wave to travel to the object and back is measured.
@@ -43,7 +37,6 @@ def main():
             cm = (stop - start) * 34300 / 2
             print(f"Distance: {cm:.2f} cm")
             GPIO.output(led, cm < 10)
-
             time.sleep(0.1)
     except KeyboardInterrupt:
         pass
