@@ -1,31 +1,29 @@
 import time
 
 import RPi.GPIO as GPIO
+import argparse
 
 from raspberry_pi_sandbox.gpio import cleanup, setmode
 
 
 @setmode(GPIO.BCM)
 @cleanup
-def main():
-    trig = 26
-    echo = 21
-    led = 20
-    GPIO.setup(trig, GPIO.OUT)
-    GPIO.setup(echo, GPIO.IN)
-    GPIO.setup(led, GPIO.OUT)
+def main(trig_pin, echo_pin, led_pin):
+    GPIO.setup(trig_pin, GPIO.OUT)
+    GPIO.setup(echo_pin, GPIO.IN)
+    GPIO.setup(led_pin, GPIO.OUT)
     try:
         while True:
-            GPIO.output(trig, GPIO.LOW)
+            GPIO.output(trig_pin, GPIO.LOW)
             time.sleep(2e-6)
-            GPIO.output(trig, GPIO.HIGH)
+            GPIO.output(trig_pin, GPIO.HIGH)
             time.sleep(10e-6)
-            GPIO.output(trig, GPIO.LOW)
-            waiter1 = GPIO.wait_for_edge(echo, GPIO.BOTH, timeout=100)
+            GPIO.output(trig_pin, GPIO.LOW)
+            waiter1 = GPIO.wait_for_edge(echo_pin, GPIO.BOTH, timeout=100)
             if waiter1 is None:
                 continue
             start = time.perf_counter()
-            waiter2 = GPIO.wait_for_edge(echo, GPIO.FALLING, timeout=100)
+            waiter2 = GPIO.wait_for_edge(echo_pin, GPIO.FALLING, timeout=100)
             if waiter2 is None:
                 continue
             stop = time.perf_counter()
@@ -36,11 +34,22 @@ def main():
             # Therefore, dividing the time by 2 gives us the actual distance to the object.
             cm = (stop - start) * 34300 / 2
             print(f"Distance: {cm:.2f} cm")
-            GPIO.output(led, cm < 10)
+            GPIO.output(led_pin, cm < 10)
             time.sleep(0.05)
     except KeyboardInterrupt:
         pass
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Ultrasonic sensor")
+    parser.add_argument(
+        "--trig", type=int, help="GPIO pin number for the trigger pin", default=26
+    )
+    parser.add_argument(
+        "--echo", type=int, help="GPIO pin number for the echo pin", default=21
+    )
+    parser.add_argument(
+        "--led", type=int, help="GPIO pin number for the LED pin", default=20
+    )
+    args = parser.parse_args()
+    main(args.trig, args.echo, args.led)
