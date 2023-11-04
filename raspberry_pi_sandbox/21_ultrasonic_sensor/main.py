@@ -4,6 +4,7 @@ import RPi.GPIO as GPIO
 import argparse
 
 from raspberry_pi_sandbox.gpio import cleanup, setmode
+from raspberry_pi_sandbox.utils import RollingAverageCalculator
 
 
 @setmode(GPIO.BCM)
@@ -14,6 +15,7 @@ def main(trig_pin, echo_pin, led_pin):
     GPIO.setup(led_pin, GPIO.OUT)
     pwm = GPIO.PWM(led_pin, 60)
     pwm.start(0)
+    rolling_avg = RollingAverageCalculator(5)
     try:
         while True:
             GPIO.output(trig_pin, GPIO.LOW)
@@ -35,10 +37,11 @@ def main(trig_pin, echo_pin, led_pin):
             # However, the distance to the object is twice the distance traveled by the sound wave.
             # Therefore, dividing the time by 2 gives us the actual distance to the object.
             cm = (stop - start) * 34300 / 2
-            duty = 100 - min(100, max(0, cm / 15 * 100))
+            duty = 100 - min(100, max(0, cm / 10 * 100))
+            duty = rolling_avg.rolling_average(duty)
             print(f"Distance: {cm:.2f} cm, Duty: {duty:.2f} %")
             pwm.ChangeDutyCycle(duty)
-            time.sleep(0.1)
+            time.sleep(0.05)
     except KeyboardInterrupt:
         pass
 
