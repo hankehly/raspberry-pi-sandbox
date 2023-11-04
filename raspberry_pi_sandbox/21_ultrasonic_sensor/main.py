@@ -12,6 +12,8 @@ def main(trig_pin, echo_pin, led_pin):
     GPIO.setup(trig_pin, GPIO.OUT)
     GPIO.setup(echo_pin, GPIO.IN)
     GPIO.setup(led_pin, GPIO.OUT)
+    pwm = GPIO.PWM(led_pin, 60)
+    pwm.start(0)
     try:
         while True:
             GPIO.output(trig_pin, GPIO.LOW)
@@ -33,9 +35,10 @@ def main(trig_pin, echo_pin, led_pin):
             # However, the distance to the object is twice the distance traveled by the sound wave.
             # Therefore, dividing the time by 2 gives us the actual distance to the object.
             cm = (stop - start) * 34300 / 2
-            print(f"Distance: {cm:.2f} cm")
-            GPIO.output(led_pin, cm < 10)
-            time.sleep(0.05)
+            duty = 100 - min(100, max(0, cm / 15 * 100))
+            print(f"Distance: {cm:.2f} cm, Duty: {duty:.2f} %")
+            pwm.ChangeDutyCycle(duty)
+            time.sleep(0.1)
     except KeyboardInterrupt:
         pass
 
