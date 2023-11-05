@@ -36,7 +36,8 @@ def main(trig_pin, echo_pin, led_pin):
             # The time it takes for the wave to travel to the object and back is measured.
             # However, the distance to the object is twice the distance traveled by the sound wave.
             # Therefore, dividing the time by 2 gives us the actual distance to the object.
-            cm = (stop - start) * 34300 / 2
+            duration = stop - start
+            cm = duration * 34300 / 2
             duty = 100 - min(100, max(0, cm / 10 * 100))
             duty = rolling_avg.rolling_average(duty)
             print(f"Distance: {cm:.2f} cm, Duty: {duty:.2f} %")
