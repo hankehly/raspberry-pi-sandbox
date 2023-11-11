@@ -33,6 +33,23 @@ def cleanup(func):
     return wrapper
 
 
+def cleanup_pigpio(func):
+    import pigpio
+
+    pi = pigpio.pi()
+
+    def wrapper(*args, **kwargs):
+        print("Cleaning up...")
+        pi.stop()
+        try:
+            func(*args, **kwargs)
+        finally:
+            print("Cleaning up...")
+            pi.stop()
+
+    return wrapper
+
+
 class LoggingMixin:
     _log: logging.Logger = None
 

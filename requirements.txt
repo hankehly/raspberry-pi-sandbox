@@ -1,2 +1,5 @@
 RPi.GPIO==0.7.1
 pigpio==1.78
+black
+isort
+gpiozero
