@@ -3,3 +3,4 @@ pigpio==1.78
 black
 isort
 gpiozero
+dht11
